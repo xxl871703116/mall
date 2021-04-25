@@ -25,6 +25,8 @@
 		methods:{
 			tabClick(index){
 				this.currentIndex = index;
+				// 子组件向父组件传递事件(自定义传递事件)
+				this.$emit("tabClick",index)
 			}
 		}
 	}

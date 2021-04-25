@@ -1,73 +1,41 @@
 <template>
 	<div id="home">
+		<!-- 顶部导航 -->
 		<nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
-		<home-swiper :banners="banners"></home-swiper>
-		<recommend-view :recommends="recommend"></recommend-view>
-		<feature-view></feature-view>
-		<tab-control class="tab-control" :titles="['流行','新款','精选']"></tab-control>
-		<ul>
-			<li>列表1</li>
-			<li>列表2</li>
-			<li>列表3</li>
-			<li>列表4</li>
-			<li>列表5</li>
-			<li>列表6</li>
-			<li>列表7</li>
-			<li>列表8</li>
-			<li>列表9</li>
-			<li>列表10</li>
-			<li>列表11</li>
-			<li>列表12</li>
-			<li>列表13</li>
-			<li>列表14</li>
-			<li>列表15</li>
-			<li>列表16</li>
-			<li>列表17</li>
-			<li>列表18</li>
-			<li>列表19</li>
-			<li>列表20</li>
-			<li>列表21</li>
-			<li>列表22</li>
-			<li>列表23</li>
-			<li>列表24</li>
-			<li>列表25</li>
-			<li>列表26</li>
-			<li>列表27</li>
-			<li>列表28</li>
-			<li>列表29</li>
-			<li>列表30</li>
-			<li>列表31</li>
-			<li>列表32</li>
-			<li>列表33</li>
-			<li>列表34</li>
-			<li>列表35</li>
-			<li>列表36</li>
-			<li>列表37</li>
-			<li>列表38</li>
-			<li>列表39</li>
-			<li>列表40</li>
-			<li>列表41</li>
-			<li>列表42</li>
-			<li>列表43</li>
-			<li>列表44</li>
-			<li>列表45</li>
-			<li>列表46</li>
-			<li>列表47</li>
-			<li>列表48</li>
-			<li>列表49</li>
-			<li>列表50</li>
-		</ul>
+		
+		<!-- 滑动组件 -->
+		<scroll class="content" ref="scroll" @scroll="contentScroll" :probeType="3" :pullUpLoad="true" @pullingUp="loadMore">
+			<!-- 轮播图 -->
+			<home-swiper :banners="banners"></home-swiper>
+			
+			<!-- 推荐商品 -->
+			<recommend-view :recommends="recommend"></recommend-view>
+			
+			<!-- 本周流行 -->
+			<feature-view></feature-view>
+			
+			<!-- tab控制 -->
+			<tab-control class="tab-control" :titles="['流行','新款','精选']" @tabClick="tabClick"></tab-control>
+			
+			<!-- 商品列表展示 -->	<!--使用的计算属性 -->
+			<goods-list :data="showGoods"></goods-list>
+		</scroll>
+		<!-- 组件本来不可以使用原生事件，加上该属性.native既可以实现监听 -->
+		<back-top @click.native="backClick" v-show="isShow"></back-top>
 	</div>
 </template>
 
 <script>
 	import NavBar from 'components/common/navbar/NavBar.vue'
+	import Scroll from 'components/common/scroll/Scroll.vue'
 	
 	import HomeSwiper from './childComps/HomeSwiper.vue'
 	import RecommendView from './childComps/RecommendView.vue'
 	import FeatureView from './childComps/FeatureView.vue'
 	
 	import TabControl from 'components/content/tabControl/TabControl.vue'
+	import GoodsList from 'components/content/goods/GoodsList.vue'
+	import BackTop from 'components/content/backTop/BackTop.vue'
 	
 	import {getHomeData,getHomeGoods} from 'network/home'
 	export default {
@@ -80,7 +48,9 @@
 					'pop':{page: 0,list: []},
 					'new':{page: 0,list: []},
 					'sell':{page: 0,list: []},
-				}
+				},
+				goodType: 'pop',
+				isShow: false
 			}
 		},
 		components:{
@@ -88,16 +58,29 @@
 			HomeSwiper,
 			RecommendView,
 			FeatureView,
-			TabControl
+			TabControl,
+			GoodsList,
+			Scroll,
+			BackTop
 		},
 		created() {
+			// 获取轮播图数据
 			this.getHomeData()
 			
+			// 获取下拉数据，(默认是加载第一页)
 			this.getHomeGoods('pop')
 			this.getHomeGoods('new')
 			this.getHomeGoods('sell')
 		},
+		computed:{
+			showGoods(){
+				return this.goods[this.goodType].list
+			}
+		},
 		methods:{
+			/**
+			 *  网络请求
+			 */
 			getHomeData(){
 				//返回的是一个Promise对象所以可以直接.then()
 				getHomeData().then(res => {
@@ -108,21 +91,61 @@
 			},
 			
 			getHomeGoods(type){
+				// 到时候只需要调用此方法就会获取下一页数据
+				// 页数+1
 				const page = this.goods[type].page+1
 				getHomeGoods(type,page).then(res =>{
 					this.goods[type].list.push(...res.data.list)
 					//页码+1
 					this.goods[type].page += 1
 				})
+			},
+			/**
+			 *  事件监听相关方法
+			 */
+			// (tab切换)接受子组件传递过来的index
+			tabClick(index){
+				// console.log(index)
+				switch(index){
+					case 0:
+						this.goodType = 'pop'
+						break
+					case 1:
+						this.goodType = 'new'
+						break
+					case 2:
+						this.goodType = 'sell'
+						break
+				}
+			},
+			
+			// 调用子组件的方法，回到顶部
+			backClick(){
+				this.$refs.scroll.scrollTo(0,0,500)
+			},
+			
+			// 控制回到顶部组件是否显示
+			contentScroll(position){
+				this.isShow = (-position.y) > 1000
+			},
+			
+			// 上拉加载更多
+			loadMore(){
+				// 给哪种类型加载更多
+				this.getHomeGoods(this.goodType)
+				this.$refs.scroll.finishPullUp()
+				this.$refs.scroll.scroll.refresh()
 			}
 		}
 	}
 </script>
 
-<style>
+<style scoped>
 	#home{
 		/* 在这添加padding解决下面的问题 */
 		padding-top: 44px;
+		height: 100vh;
+		position: relative;
 	}
 	
 	.home-nav{
@@ -142,5 +165,14 @@
 		top: 44px;
 		background-color: #fff;
 		z-index: 9;
+	}
+	
+	.content{
+		position: absolute;
+		overflow: hidden;
+		top: 44px;
+		bottom: 49px;
+		left: 0;
+		right: 0;
 	}
 </style>
