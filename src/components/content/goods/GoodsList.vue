@@ -1,8 +1,6 @@
 <template>
 	<div class="goods">
-		<ul v-for="item in data">
-			<li><goods-list-item :obj="item"></goods-list-item></li>
-		</ul>	
+			<goods-list-item v-for="item in data" :obj="item"></goods-list-item>
 	</div>
 </template>
 

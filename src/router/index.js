@@ -9,6 +9,7 @@ const Home = () => import('views/home/Home.vue')
 const Category = () => import('views/category/Category.vue')
 const Cart = () => import('views/cart/Cart.vue')
 const Profile = () => import('views/profile/Profile.vue')
+const Detail = () => import('views/detail/Detail.vue')
 
 // 2.创建router
 const router = new VueRouter({
@@ -32,9 +33,14 @@ const router = new VueRouter({
 		{
 			path:'/profile',
 			component: Profile
+		},
+		{
+			path:'/detail/:id',
+			component:Detail
 		}
 	],
-	mode:'history'
+	mode:'history' //消除#号
 })
 
+// 3.导出这个router在main.js中注册
 export default router

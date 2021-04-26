@@ -1,6 +1,6 @@
 <template>
-	<div class="goods-item">
-		<img :src="obj.show.img" alt="">
+	<div class="goods-item" @click="itemClick">
+		<img :src="obj.show.img" @load="imgLoad">
 		<div class="goods-info">
 			<p>{{obj.title}}</p>
 			<span class="price">{{obj.price}}</span>
@@ -18,6 +18,16 @@
 				default(){
 					return {}
 				}
+			}
+		},
+		methods:{
+			imgLoad(){
+				//加载完成向事件总线发送一个imgFinish事件
+				this.$bus.$emit("imgFinish")
+			},
+			// 点击的时候传递参数id到详情页
+			itemClick(){
+				this.$router.push('/detail/'+ this.obj.iid)
 			}
 		}
 	}
