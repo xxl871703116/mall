@@ -18,8 +18,7 @@
 		data(){
 			return{
 				titles: ['商品','参数','评论','推荐'],
-				currentIndex: 0, // 保存当前高亮导航选项
-				banners: [], // 轮播图数据
+				currentIndex: 0, // 保存当前高亮导航选项下标
 			}
 		},
 		components:{

@@ -88,6 +88,7 @@
 		destroyed() {
 			console.log("home destroyed...")
 		},
+		
 		// 和keep-alive配套使用的，当这个组件被激活时使用
 		// 活跃时定位到离开的位置
 		activated() {
@@ -100,6 +101,7 @@
 		deactivated() {
 			this.saveY = this.$refs.scroll.getY()
 		},
+		
 		// 此时通过this.$refs去取组件对象或者元素对象时放在created函数中有可能取不到，所以放在mounted中
 		mounted() {
 			// 接收事件总线传递过来的事件 imgFinish 拿到scroll对象去刷新重写计算高度
@@ -116,6 +118,7 @@
 		
 		computed:{
 			showGoods(){
+				// 显示的是哪种类型的数据
 				return this.goods[this.goodType].list
 			}
 		},

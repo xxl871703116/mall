@@ -2,23 +2,29 @@
 	<div id='detail'>
 		<!-- 详情页导航 -->
 		<detail-nav-bar></detail-nav-bar>
+		
+		<!-- 轮播图 -->
+		<detail-swiper :topImages="topImages"></detail-swiper>
 	</div>
 </template>
 
 <script>
 	import DetailNavBar from './childComps/DetailNavBar.vue'
+	import DetailSwiper from './childComps/DetailSwiper.vue'
 	
 	import {getDetailData} from 'network/detail.js'
 	
 	export default {
-		name: "",
+		name: "Detail",
 		data(){
 			return{
-				iid: null
+				iid: null,
+				topImages: []
 			}
 		},
 		components:{
-			DetailNavBar
+			DetailNavBar,
+			DetailSwiper
 		},
 		created() {
 			// 1.保存传递过来的id
@@ -27,6 +33,7 @@
 			// 2.请求数据
 			getDetailData(this.iid).then(res => {
 				console.log(res)
+				this.topImages = res.result.itemInfo.topImages
 			})
 		}
 	}
