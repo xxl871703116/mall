@@ -27,7 +27,10 @@
 		methods:{
 			// 获取点击的选项的标题下标
 			titleClick(index){
-				this.currentIndex = index
+				this.currentIndex = index // 改变当前高亮的标题
+				
+				// 发送一个点击事件给父组件
+				this.$emit("titleClick",index)
 			},
 			backClick(){
 				// 返回

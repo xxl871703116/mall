@@ -43,10 +43,12 @@
 	
 	import {getHomeData,getHomeGoods} from 'network/home'
 	import {debounce} from 'common/utils.js'
+	import {itemListenerMixin} from 'common/mixin.js'
 	
 	
 	export default {
 		name:'',
+		mixins:[itemListenerMixin],
 		data(){
 			return{
 				banners: [], // 轮播图数据
@@ -60,7 +62,8 @@
 				isShow: false, //是否显示回到顶部按钮
 				tabOffsetTop: 0, // tabControl组件的距离顶部的位置
 				isShowTabControl: false, //是否显示tabControl组件
-				saveY: 0,
+				saveY: 0 // 记录离开时候的Y的值
+				
 			}
 		},
 		// 注册组件
@@ -97,9 +100,13 @@
 			this.$refs.scroll.refresh()
 		},
 		// 和keep-alive配套使用的，当这个组件被离开时使用
-		// 离开时记录离开的位置
+		// 离开时记录离开的位置  --> 以及关闭监听事件总线的事件
 		deactivated() {
 			this.saveY = this.$refs.scroll.getY()
+			
+			// 关闭监听
+			this.imgListener = this.$bus.$off("imgFinish",() => {
+			})
 		},
 		
 		// 此时通过this.$refs去取组件对象或者元素对象时放在created函数中有可能取不到，所以放在mounted中
@@ -109,11 +116,13 @@
 			// 	this.$refs.scroll.refresh()
 			// })
 			
+			// 保存这个回调的函数(抽离出来的，不抽也是可以，为了方便而已)
+			// this.imgListener = () => { refresh() }  -->混入
+			
 			// 防抖函数封装后
-			const refresh = debounce(this.$refs.scroll.refresh,200)
-			this.$bus.$on("imgFinish",() => {
-				refresh()
-			})
+			// const refresh = debounce(this.$refs.scroll.refresh,200) -->混入
+			
+			// this.$bus.$on("imgFinish", this.imgListener) -->混入
 		},
 		
 		computed:{
@@ -154,7 +163,6 @@
 			 */
 			// (tab切换)接受子组件传递过来的index
 			tabClick(index){
-				// console.log(index)
 				switch(index){
 					case 0:
 						this.goodType = 'pop'

@@ -53,7 +53,8 @@
 			this.scroll = new BScroll(this.$refs.wrapper,{
 				click:true, // 允许scroll中有点击事件
 				probeType: this.probeType,
-				pullUpLoad: this.pullUpLoad
+				pullUpLoad: this.pullUpLoad,
+				mouseWheel: false
 			})
 			
 			// 2.监听滚动的位置

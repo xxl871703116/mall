@@ -1,6 +1,6 @@
 <template>
 	<div class="goods-item" @click="itemClick">
-		<img :src="obj.show.img" @load="imgLoad">
+		<img :src="showImage" @load="imgLoad">
 		<div class="goods-info">
 			<p>{{obj.title}}</p>
 			<span class="price">{{obj.price}}</span>
@@ -20,9 +20,29 @@
 				}
 			}
 		},
+		computed:{
+			showImage(){
+				return this.obj.image || this.obj.show.img
+			}
+		},
 		methods:{
 			imgLoad(){
-				//加载完成向事件总线发送一个imgFinish事件
+				// 加载完成向首页的事件总线发送一个imgFinish事件 	-->问题：  此时详情页也使用了该组件，当详情页的图片加载完还是会向首页发送一个事件  这是不允许的×
+				
+				/* 
+					解决方式一：使用路由的方式  判断当前活跃的组件是谁，如果是首页，当图片加载完，就发送homeimgFinish事件，如果是详情页，当图片加载完，就发生detailimgFinish事件
+						   然后做不同的监听就哦可
+						   
+						if(this.$route.path.indexOf('/home') != -1){ 
+							this.$bus.$emit("homeimgFinish")
+						}else if(this.$route.path.indexOf('/detail') != -1){
+							this.$bus.$emit("detailimgFinish")
+						}
+				 */ 
+				
+				/* 
+					解决方式二： 使用混入mixin  还是发送同一个事件，然后在监听这个事件的组件中的 离开时调用的函数 deactivated() 去关闭监听 this.$bus.$off("imgFinish",函数)
+				 */
 				this.$bus.$emit("imgFinish")
 			},
 			// 点击的时候传递参数id到详情页
