@@ -1,9 +1,9 @@
 <template>
 	<div id='detail'>
 		<!-- 详情页导航 -->
-		<detail-nav-bar class="detail-nav-bar" @titleClick="titleClick"></detail-nav-bar>
+		<detail-nav-bar class="detail-nav-bar" @titleClick="titleClick" ref="nav"></detail-nav-bar>
 		
-		<scroll ref="scroll" class="content" :pullUpLoad="true" >
+		<scroll ref="scroll" class="content" :pullUpLoad="true" @scroll="contentScroll" :probeType="3">
 			<!-- 商品展示的轮播图 -->
 			<detail-swiper :topImages="topImages"></detail-swiper>
 			
@@ -26,6 +26,12 @@
 			<goods-list ref="recommend" :data="recommend" ></goods-list>
 		</scroll>
 		
+		<!-- 回到顶部 -->
+		<back-top @click.native="backClick" v-show="isShow"></back-top>
+		
+		<!-- 底部工具Bar -->
+		<detail-bottom-bar></detail-bottom-bar>
+		
 	</div>
 </template>
 
@@ -37,8 +43,10 @@
 	import DetailGoodsInfo from './childComps/DetailGoodsInfo.vue'
 	import DetailParamInfo from './childComps/DetailParamInfo.vue'
 	import DetailCommentInfo from './childComps/DetailCommentInfo.vue'
+	import DetailBottomBar from './childComps/DetailBottomBar.vue'
 	
 	import GoodsList from 'components/content/goods/GoodsList.vue'
+	import BackTop from 'components/content/backTop/BackTop.vue'
 	
 	import Scroll from 'components/common/scroll/Scroll.vue'
 	
@@ -59,7 +67,9 @@
 				goodsParam: {},
 				commentInfo: {},
 				recommend: [],
-				titleTop: []  // 保存不同标题的位置
+				titleTop: [],  // 保存不同标题的位置
+				currentIndex: 0,
+				isShow: false, //是否显示回到顶部按钮
 			}
 		},
 		components:{
@@ -71,7 +81,9 @@
 			DetailGoodsInfo,
 			DetailParamInfo,
 			DetailCommentInfo,
-			GoodsList
+			DetailBottomBar,
+			GoodsList,
+			BackTop
 		},
 		created() {
 			// 1.保存传递过来的id
@@ -143,23 +155,41 @@
 				this.$refs.scroll.refresh()  // 重新去计算高度
 				
 				
-				// 应该在这里去获取定位值，当所以的图片加载完之后
+				// 第三次获取: 应该在这里去获取定位值，当所以的图片加载完之后
 				this.titleTop = []
 				this.titleTop.push(0)
 				this.titleTop.push(this.$refs.param.$el.offsetTop)
 				this.titleTop.push(this.$refs.comment.$el.offsetTop)
 				this.titleTop.push(this.$refs.recommend.$el.offsetTop)
+				this.titleTop.push(Number.MAX_VALUE)
 				
 				console.log(this.titleTop)
 			},
 			
 			titleClick(index){
+				// 点击到对应的高度
 				this.$refs.scroll.scrollTo(0,-this.titleTop[index],200)
+			},
+			
+			// [0, 14974, 16363, 16695,MAX_INTEGER]
+			contentScroll(position){
+				this.isShow = (-position.y) > 1000
+				// console.log(-position.y)
+				
+				for (let i = 0; i < this.titleTop.length-1; i++) {
+					if(this.currentIndex != i && -position.y >= this.titleTop[i] && -position.y < this.titleTop[i+1] ){
+						this.currentIndex = i
+						this.$refs.nav.currentIndex = this.currentIndex
+					}
+				}
+			},
+			backClick(){
+				this.$refs.scroll.scrollTo(0,0,500)
 			}
 		},
 		
 		mounted() {
-			/* this.imgListener = () => { refresh() }  --> 混入
+			/* this.imgListener = () => { refresh() }  --> 会被混入进去
 			
 			// 防抖函数封装后
 			const refresh = debounce(this.$refs.scroll.refresh,200)  --> 混入

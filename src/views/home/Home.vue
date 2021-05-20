@@ -48,7 +48,7 @@
 	
 	export default {
 		name:'',
-		mixins:[itemListenerMixin],
+		mixins:[itemListenerMixin],  // 使用混入
 		data(){
 			return{
 				banners: [], // 轮播图数据
