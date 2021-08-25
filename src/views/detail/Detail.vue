@@ -35,6 +35,8 @@
 		<!-- 底部工具Bar -->
 		<detail-bottom-bar @addCart="addToCart"></detail-bottom-bar>
 
+    <toast></toast>
+
 	</div>
 </template>
 
@@ -56,6 +58,9 @@
 	import {getDetailData, Goods, Shop, GoodsParam, getRecommend} from 'network/detail.js'
 	import {debounce} from 'common/utils.js'
 	import {itemListenerMixin} from 'common/mixin.js'
+
+
+  import Toast from "../../components/common/toast/Toast";
 
 	export default {
 		name: "Detail",
@@ -86,7 +91,8 @@
 			DetailCommentInfo,
 			DetailBottomBar,
 			GoodsList,
-			BackTop
+			BackTop,
+      Toast
 		},
 		created() {
 			// 1.保存传递过来的id
@@ -201,13 +207,17 @@
       addToCart(){
         // 1.获取添加的商品的信息(购物车需要展示的信息)
         const product = {}
-        product.title = this.topImages[0]
-        product.desc = this.goods.desc
-        product.price = this.goods.realPrice
-        product.iid = this.iid
+        product.image = this.topImages[0];
+        product.title = this.goods.title;
+        product.desc = this.goods.desc;
+        product.price = this.goods.realPrice;
+        product.iid = this.iid;
+        product.newPrice = this.newPrice;
 
         // 2.将商品添加到购物车
-        this.$store.commit('addCart',product)
+        this.$store.dispatch('addCart',product).then(res => {
+          this.$toast.show(res,1500)
+        })
 
       }
 		},
